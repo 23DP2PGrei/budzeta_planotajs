@@ -1,4 +1,6 @@
 import tkinter as tk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 WIDTH = 375
 HEIGHT = 645
@@ -8,7 +10,99 @@ BUTTON_HIGHLIGHT = "#0B2447"
 BG_COLOR = "#E7E7E6"
 EURO_IMAGE_PATH = "photos/euro_photo.png" 
 
-def open_third_window(previous_window):
+def open_results_window(previous_window, income, spending_data):
+    previous_window.destroy()
+
+    total_spent = sum(spending_data.values())
+    income = int(income)
+    balance = income - total_spent
+
+    fig, ax = plt.subplots(figsize=(3.2, 3.2), dpi=100)
+
+    categories = list(spending_data.keys())
+    values = list(spending_data.values())
+
+    wedges, texts, autotexts = ax.pie(
+    values,
+    labels=categories,
+    startangle=90,
+    textprops={'fontsize': 8, 'color': TEXT_COLOR},
+    autopct='%1.1f%%'
+    )
+
+    ax.axis('equal')
+
+    ax.text(0, 0, f"{sum(values)}€", ha='center', va='center',
+        fontsize=16, fontweight='bold', color=TEXT_COLOR)
+
+    fifth = tk.Tk()
+    fifth.title("Budget Summary")
+    fifth.geometry(f"{WIDTH}x{HEIGHT}")
+    fifth.resizable(False, False)
+    fifth.configure(bg=BG_COLOR)
+
+    tk.Label(fifth, text="Budget Planner", font=("Arial", 24, "bold"),
+             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
+
+    canvas = FigureCanvasTkAgg(fig, master=fifth)
+    canvas.draw()
+    canvas.get_tk_widget().pack(pady=10)
+
+    balance_text = f"Balance: {balance}€"
+    tk.Label(fifth, text=balance_text, font=("Arial", 14),
+             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(10, 5))
+
+    done_button = tk.Button(
+        fifth,
+        text="Done", 
+        font=("Arial", 12, "bold"),
+        fg=TEXT_COLOR,
+        bg=BG_COLOR,
+        activebackground="#DADADA",
+        bd=0,
+        highlightthickness=0,
+        command=fifth.destroy
+        )
+    done_button.place(relx=0.95, rely=0.97, anchor="se")
+
+    fifth.mainloop()
+
+def open_savings_goal_window(previous_window, income, spending_data):
+    previous_window.destroy()
+
+    fourth = tk.Tk()
+    fourth.title("Savings Goal")
+    fourth.geometry(f"{WIDTH}x{HEIGHT}")
+    fourth.resizable(False, False)
+    fourth.configure(bg=BG_COLOR)
+
+    tk.Label(fourth, text="Budget Planner", font=("Arial", 24, "bold"),
+             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(30, 10))
+
+    tk.Label(fourth, text="Do you have\na savings goal?",
+             font=("Arial", 18, "bold"),
+             fg=TEXT_COLOR, bg=BG_COLOR, justify="center").pack(pady=(20, 20))
+
+    button_frame = tk.Frame(fourth, bg=BG_COLOR)
+    button_frame.pack()
+
+    def on_yes():
+        print("User selected YES")
+
+    def on_no():
+        open_results_window(fourth, income, spending_data)
+      
+    yes_button = tk.Button(button_frame, text="Yes", font=("Arial", 14),
+                           bg=BUTTON_BG, fg=TEXT_COLOR, bd=1, width=8, command=on_yes)
+    yes_button.grid(row=0, column=0, padx=10)
+
+    no_button = tk.Button(button_frame, text="No", font=("Arial", 14),
+                          bg=BUTTON_BG, fg=TEXT_COLOR, bd=1, width=8, command=on_no)
+    no_button.grid(row=0, column=1, padx=10)
+
+    fourth.mainloop()
+
+def open_third_window(previous_window, income):
     previous_window.destroy()
 
     third = tk.Tk()
@@ -24,12 +118,12 @@ def open_third_window(previous_window):
     content_frame.pack(pady=10)
 
     category_entries = []
-    base_font_size = 14
+    base_font_size = 13
 
     def update_fonts():
         nonlocal base_font_size
         if len(category_entries) > 5:
-            base_font_size = max(10, 14 - (len(category_entries) // 2))
+            base_font_size = max(13, 13 - (len(category_entries) // 2))
         for label, entry in category_entries:
             label.config(font=("Arial", base_font_size))
             entry.config(font=("Arial", base_font_size))
@@ -88,13 +182,25 @@ def open_third_window(previous_window):
     error_label = tk.Label(third, text="", font=("Arial", 10), fg="red", bg=BG_COLOR)
     error_label.pack()
 
+    def get_spending_data():
+        data = {}
+        for label, entry in category_entries:
+            name = label.cget("text")
+            try:
+                amount = int(entry.get())
+            except ValueError:
+                amount = 0
+            data[name] = amount
+        return data
+
+
     def validate_and_continue():
         for label, entry in category_entries:
             if not entry.get().strip():
                 error_label.config(text="Please fill in all fields.")
                 return
-        error_label.config(text="")
-        print("Next log here...")
+        spending_data = get_spending_data()
+        open_savings_goal_window(third, income, spending_data)
 
     next_button = tk.Button(
         third,
@@ -176,20 +282,20 @@ def open_second_window():
     def validate_and_continue():
         user_id = user_id_entry.get().strip()
         month = selected_month.get()
-        income = income_entry.get().strip()
+        income_str = income_entry.get().strip()
 
-        if not user_id or month == "Select Month" or not income:
+        if not user_id or month == "Select Month" or not income_str:
             error_label.config(text="Please fill in all fields.")
             return
 
         try:
-            int(income)
+            int(income_str)
         except ValueError:
             error_label.config(text="Monthly income must be a number.")
             return
 
         error_label.config(text="")
-        open_third_window(second)
+        open_third_window(second, income_str)
 
     next_button = tk.Button(
         second,
