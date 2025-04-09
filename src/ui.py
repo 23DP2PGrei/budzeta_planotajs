@@ -12,8 +12,9 @@ WIDTH = 375
 HEIGHT = 645
 TEXT_COLOR = "#0B2447"
 BUTTON_BG = "#FFFFFF"
+BUTTON_HIGHLIGHT = "#0B2447"
 BG_COLOR = "#E7E7E6"
-EURO_IMAGE_PATH = "photos/euro_photo.png"
+EURO_IMAGE_PATH = "photos/euro_photo.png" 
 
 def open_results_window_last(previous_window, income, spending_data):
     previous_window.destroy()
