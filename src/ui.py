@@ -1,6 +1,12 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from apreikins import (
+    calculate_balance,
+    calculate_total_spent,
+    get_spending_data,
+    calculate_savings_plan
+)
 
 WIDTH = 375
 HEIGHT = 645
@@ -10,81 +16,65 @@ BUTTON_HIGHLIGHT = "#0B2447"
 BG_COLOR = "#E7E7E6"
 EURO_IMAGE_PATH = "photos/euro_photo.png" 
 
+WIDTH = 375
+HEIGHT = 645
+TEXT_COLOR = "#0B2447"
+BUTTON_BG = "#FFFFFF"
+BG_COLOR = "#E7E7E6"
+EURO_IMAGE_PATH = "photos/euro_photo.png"
+
 def open_results_window_last(previous_window, income, spending_data):
     previous_window.destroy()
-
-    total_spent = sum(spending_data.values())
-    income = int(income)
-    balance = income - total_spent
+    total_spent = calculate_total_spent(spending_data)
+    balance = calculate_balance(income, total_spent)
 
     fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
-
     categories = list(spending_data.keys())
     values = list(spending_data.values())
 
-    wedges, texts, autotexts = ax.pie(
-    values,
-    labels=categories,
-    startangle=90,
-    textprops={'fontsize': 8, 'color': TEXT_COLOR},
-    autopct='%1.1f%%'
-    )
-
+    ax.pie(values, labels=categories, startangle=90,
+           textprops={'fontsize': 8, 'color': TEXT_COLOR},
+           autopct='%1.1f%%')
     ax.axis('equal')
-
     ax.text(0, 0, f"{sum(values)}€", ha='center', va='center',
-        fontsize=16, fontweight='bold', color=TEXT_COLOR)
+            fontsize=16, fontweight='bold', color=TEXT_COLOR)
 
     last = tk.Tk()
     last.title("Budget Summary")
     last.geometry(f"{WIDTH}x{HEIGHT}")
-    last.resizable(False, False)
     last.configure(bg=BG_COLOR)
 
-    tk.Label(last, text="Budget Planner", font=("Arial", 24, "bold"),
-             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
-
+    tk.Label(last, text="Budget Planner", font=("Arial", 24, "bold"), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
     canvas = FigureCanvasTkAgg(fig, master=last)
     canvas.draw()
     canvas.get_tk_widget().pack(pady=10)
 
     balance_text = f"Balance: {balance}€"
-    tk.Label(last, text=balance_text, font=("Arial", 14),
-             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(10, 5))
+    tk.Label(last, text=balance_text, font=("Arial", 14), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(10, 5))
 
-    done_button = tk.Button(
-        last,
+    tk.Button(
+        last, 
         text="Done", 
         font=("Arial", 12, "bold"),
-        fg=TEXT_COLOR,
-        bg=BG_COLOR,
-        activebackground="#DADADA",
-        bd=0,
-        highlightthickness=0,
-        command=last.destroy
-        )
-    done_button.place(relx=0.95, rely=0.97, anchor="se")
+        fg=TEXT_COLOR, 
+        bg=BG_COLOR, bd=0,
+        highlightthickness=0, 
+        command=last.destroy).place(relx=0.95, rely=0.97, anchor="se")
 
     last.mainloop()
 
 def open_savings_plan_window(previous_window, goal, time, income, spending_data):
     previous_window.destroy()
+    monthly_goal, shortage, balance = calculate_savings_plan(goal, time, income, spending_data)
 
-    total_spent = sum(spending_data.values())
-    balance = income - total_spent
-    monthly_goal = goal // time
-    shortage = monthly_goal - balance
+    sixth = tk.Tk()
+    sixth.title("Savings Plan")
+    sixth.geometry(f"{WIDTH}x{HEIGHT}")
+    sixth.configure(bg=BG_COLOR)
 
-    sixth_yes = tk.Tk()
-    sixth_yes.title("Savings Plan")
-    sixth_yes.geometry(f"{WIDTH}x{HEIGHT}")
-    sixth_yes.resizable(False, False)
-    sixth_yes.configure(bg=BG_COLOR)
+    tk.Label(sixth, text="Budget Planner", font=("Arial", 24, "bold"), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(30, 10))
 
-    tk.Label(sixth_yes, text="Budget Planner", font=("Arial", 24, "bold"),
-             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(30, 10))
-
-    info_frame = tk.Frame(sixth_yes, bg=BG_COLOR)
+    info_frame = tk.Frame(sixth, bg=BG_COLOR)
     info_frame.pack(pady=10, anchor="w", padx=20)
 
     def add_info(label_text, value_text, color=TEXT_COLOR):
@@ -102,20 +92,18 @@ def open_savings_plan_window(previous_window, goal, time, income, spending_data)
     else:
         add_info("Savings status:", f"You need {shortage}€ more", color="red")
 
-    next_button = tk.Button(
-        sixth_yes,
-        text="Next →",
-        font=("Arial", 12, "bold"),
-        fg=TEXT_COLOR,
-        bg=BG_COLOR,
-        activebackground="#DADADA",
-        bd=0,
-        highlightthickness=0,
-        command=lambda: open_results_window_last(sixth_yes, income, spending_data)  # TODO 
-    )
-    next_button.place(relx=0.95, rely=0.97, anchor="se")
+    tk.Button(sixth, 
+              text="Next →", 
+              font=("Arial", 12, "bold"),
+              fg=TEXT_COLOR, 
+              bg=BG_COLOR, 
+              bd=0,
+              highlightthickness=0, 
+              activebackground="#DADADA",
+              command=lambda: open_results_window_last(sixth, income, spending_data)
+              ).place(relx=0.95, rely=0.97, anchor="se")
 
-    sixth_yes.mainloop()
+    sixth.mainloop()
 
 def open_savings_input_window(previous_window, income, spending_data):
     previous_window.destroy()
@@ -180,58 +168,41 @@ def open_savings_input_window(previous_window, income, spending_data):
 
 def open_results_window(previous_window, income, spending_data):
     previous_window.destroy()
-
-    total_spent = sum(spending_data.values())
-    income = int(income)
-    balance = income - total_spent
+    total_spent = calculate_total_spent(spending_data)
+    balance = calculate_balance(income, total_spent)
 
     fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
-
     categories = list(spending_data.keys())
     values = list(spending_data.values())
 
-    wedges, texts, autotexts = ax.pie(
-    values,
-    labels=categories,
-    startangle=90,
-    textprops={'fontsize': 8, 'color': TEXT_COLOR},
-    autopct='%1.1f%%'
-    )
-
+    ax.pie(values, labels=categories, startangle=90,
+           textprops={'fontsize': 8, 'color': TEXT_COLOR},
+           autopct='%1.1f%%')
     ax.axis('equal')
-
     ax.text(0, 0, f"{sum(values)}€", ha='center', va='center',
-        fontsize=16, fontweight='bold', color=TEXT_COLOR)
+            fontsize=16, fontweight='bold', color=TEXT_COLOR)
 
     fifth = tk.Tk()
     fifth.title("Budget Summary")
     fifth.geometry(f"{WIDTH}x{HEIGHT}")
-    fifth.resizable(False, False)
     fifth.configure(bg=BG_COLOR)
 
-    tk.Label(fifth, text="Budget Planner", font=("Arial", 24, "bold"),
-             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
-
+    tk.Label(fifth, text="Budget Planner", font=("Arial", 24, "bold"), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
     canvas = FigureCanvasTkAgg(fig, master=fifth)
     canvas.draw()
     canvas.get_tk_widget().pack(pady=10)
 
     balance_text = f"Balance: {balance}€"
-    tk.Label(fifth, text=balance_text, font=("Arial", 14),
-             fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(10, 5))
+    tk.Label(fifth, text=balance_text, font=("Arial", 14), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(10, 5))
 
-    done_button = tk.Button(
-        fifth,
-        text="Done", 
-        font=("Arial", 12, "bold"),
-        fg=TEXT_COLOR,
-        bg=BG_COLOR,
-        activebackground="#DADADA",
-        bd=0,
-        highlightthickness=0,
-        command=fifth.destroy
-        )
-    done_button.place(relx=0.95, rely=0.97, anchor="se")
+    tk.Button(fifth, 
+              text="Done", 
+              font=("Arial", 12, "bold"),
+              fg=TEXT_COLOR, 
+              bg=BG_COLOR, 
+              bd=0,
+              highlightthickness=0, 
+              command=fifth.destroy).place(relx=0.95, rely=0.97, anchor="se")
 
     fifth.mainloop()
 
@@ -350,24 +321,12 @@ def open_third_window(previous_window, income):
     error_label = tk.Label(third, text="", font=("Arial", 10), fg="red", bg=BG_COLOR)
     error_label.pack()
 
-    def get_spending_data():
-        data = {}
-        for label, entry in category_entries:
-            name = label.cget("text")
-            try:
-                amount = int(entry.get())
-            except ValueError:
-                amount = 0
-            data[name] = amount
-        return data
-
-
     def validate_and_continue():
         for label, entry in category_entries:
             if not entry.get().strip():
                 error_label.config(text="Please fill in all fields.")
                 return
-        spending_data = get_spending_data()
+        spending_data = get_spending_data(category_entries)
         open_savings_goal_window(third, income, spending_data)
 
     next_button = tk.Button(
