@@ -1,6 +1,7 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from data import save_data_to_csv
 from apreikins import (
     calculate_balance,
     calculate_total_spent,
@@ -16,10 +17,14 @@ BUTTON_HIGHLIGHT = "#0B2447"
 BG_COLOR = "#E7E7E6"
 EURO_IMAGE_PATH = "photos/euro_photo.png" 
 
-def open_results_window_last(previous_window, income, spending_data):
+def open_results_window_last(previous_window, income, spending_data, user_id, month):
     previous_window.destroy()
+
     total_spent = calculate_total_spent(spending_data)
     balance = calculate_balance(income, total_spent)
+
+    file_path = "data/budget_data.csv"
+    save_data_to_csv(file_path, user_id, month, income, spending_data, balance)
 
     fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
     categories = list(spending_data.keys())
@@ -56,7 +61,7 @@ def open_results_window_last(previous_window, income, spending_data):
 
     last.mainloop()
 
-def open_savings_plan_window(previous_window, goal, time, income, spending_data):
+def open_savings_plan_window(previous_window, goal, time, income, spending_data, user_id, month):
     previous_window.destroy()
     monthly_goal, shortage, balance = calculate_savings_plan(goal, time, income, spending_data)
 
@@ -93,12 +98,12 @@ def open_savings_plan_window(previous_window, goal, time, income, spending_data)
               bd=0,
               highlightthickness=0, 
               activebackground="#DADADA",
-              command=lambda: open_results_window_last(sixth, income, spending_data)
+              command=lambda: open_results_window_last(sixth, income, spending_data, user_id, month)
               ).place(relx=0.95, rely=0.97, anchor="se")
 
     sixth.mainloop()
 
-def open_savings_input_window(previous_window, income, spending_data):
+def open_savings_input_window(previous_window, income, spending_data, user_id, month):
     previous_window.destroy()
 
     fifth_yes = tk.Tk()
@@ -142,7 +147,7 @@ def open_savings_input_window(previous_window, income, spending_data):
             return
 
         error_label.config(text="")
-        open_savings_plan_window(fifth_yes, goal, time, int(income), spending_data)
+        open_savings_plan_window(fifth_yes, goal, time, int(income), spending_data, user_id, month)
 
     next_button = tk.Button(
         fifth_yes, 
@@ -159,10 +164,14 @@ def open_savings_input_window(previous_window, income, spending_data):
 
     fifth_yes.mainloop()
 
-def open_results_window(previous_window, income, spending_data):
+def open_results_window(previous_window, income, spending_data, user_id, month):
     previous_window.destroy()
+
     total_spent = calculate_total_spent(spending_data)
     balance = calculate_balance(income, total_spent)
+
+    file_path = "data/budget_data.csv"
+    save_data_to_csv(file_path, user_id, month, income, spending_data, balance)
 
     fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
     categories = list(spending_data.keys())
@@ -199,7 +208,7 @@ def open_results_window(previous_window, income, spending_data):
 
     fifth.mainloop()
 
-def open_savings_goal_window(previous_window, income, spending_data):
+def open_savings_goal_window(previous_window, income, spending_data, user_id, month):
     previous_window.destroy()
 
     fourth = tk.Tk()
@@ -219,10 +228,10 @@ def open_savings_goal_window(previous_window, income, spending_data):
     button_frame.pack()
 
     def on_yes():
-        open_savings_input_window(fourth, income, spending_data)
+        open_savings_input_window(fourth, income, spending_data, user_id, month)
 
     def on_no():
-        open_results_window(fourth, income, spending_data)
+        open_results_window(fourth, income, spending_data, user_id, month)
       
     yes_button = tk.Button(button_frame, text="Yes", font=("Arial", 14),
                            bg=BUTTON_BG, fg=TEXT_COLOR, bd=1, width=8, command=on_yes)
@@ -234,7 +243,7 @@ def open_savings_goal_window(previous_window, income, spending_data):
 
     fourth.mainloop()
 
-def open_third_window(previous_window, income):
+def open_third_window(previous_window, income, user_id, month):
     previous_window.destroy()
 
     third = tk.Tk()
@@ -320,7 +329,7 @@ def open_third_window(previous_window, income):
                 error_label.config(text="Please fill in all fields.")
                 return
         spending_data = get_spending_data(category_entries)
-        open_savings_goal_window(third, income, spending_data)
+        open_savings_goal_window(third, income, spending_data, user_id, month)
 
     next_button = tk.Button(
         third,
@@ -415,7 +424,7 @@ def open_second_window():
             return
 
         error_label.config(text="")
-        open_third_window(second, income_str)
+        open_third_window(second, income_str, user_id, month)
 
     next_button = tk.Button(
         second,
