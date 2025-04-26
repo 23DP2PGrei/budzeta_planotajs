@@ -1,8 +1,8 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from data import save_data_to_csv
-from apreikins import (
+from data.data import save_data_to_csv
+from src.apreikins import (
     calculate_balance,
     calculate_total_spent,
     get_spending_data,
@@ -441,38 +441,40 @@ def open_second_window():
 
     second.mainloop()
 
-root = tk.Tk()
-root.title("Budget Planner")
-root.geometry(f"{WIDTH}x{HEIGHT}")
-root.resizable(False, False)
-root.configure(bg=BG_COLOR)
+def start_app():
+    global root
+    root = tk.Tk()
+    root.title("Budget Planner")
+    root.geometry(f"{WIDTH}x{HEIGHT}")
+    root.resizable(False, False)
+    root.configure(bg=BG_COLOR)
 
-title = tk.Label(
-    root,
-    text="Budget Planner",
-    font=("Arial", 28, "bold"),
-    fg=TEXT_COLOR,
-    bg=BG_COLOR
-)
-title.place(relx=0.5, rely=0.35, anchor="center")
+    title = tk.Label(
+        root,
+        text="Budget Planner",
+        font=("Arial", 28, "bold"),
+        fg=TEXT_COLOR,
+        bg=BG_COLOR
+    )
+    title.place(relx=0.5, rely=0.35, anchor="center")
 
-enter_button = tk.Button(
-    root, 
-    text="Enter", 
-    activebackground=BUTTON_HIGHLIGHT, 
-    activeforeground="white",
-    anchor="center",
-    bd=3,
-    bg="white",
-    disabledforeground="gray",
-    fg="black",
-    font=("Arial", 16),
-    height=1,
-    width=12,
-    justify="center",
-    overrelief="raised",
-    command=open_second_window
-)
-enter_button.place(relx=0.5, rely=0.50, anchor="center")
+    enter_button = tk.Button(
+        root, 
+        text="Enter", 
+        activebackground=BUTTON_HIGHLIGHT, 
+        activeforeground="white",
+        anchor="center",
+        bd=3,
+        bg="white",
+        disabledforeground="gray",
+        fg="black",
+        font=("Arial", 16),
+        height=1,
+        width=12,
+        justify="center",
+        overrelief="raised",
+        command=open_second_window
+    )
+    enter_button.place(relx=0.5, rely=0.50, anchor="center")
 
-root.mainloop()
+    root.mainloop()
