@@ -8,12 +8,15 @@ from src.settings.parameters import WIDTH, HEIGHT, TEXT_COLOR, BG_COLOR
 def open_results_window(previous_window, income, spending_data, user_id, month):
     previous_window.destroy()
 
+    # Aprēķina kopējos izdevumus un atlikumu
     total_spent = calculate_total_spent(spending_data)
     balance = calculate_balance(income, total_spent)
 
+    # Saglabā CSV failā
     file_path = "data/budget_data.csv"
     save_data_to_csv(file_path, user_id, month, income, spending_data, balance)
 
+    # Izveido sektoru diagrammu par izdevumiem
     fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
     categories = list(spending_data.keys())
     values = list(spending_data.values())
@@ -21,23 +24,28 @@ def open_results_window(previous_window, income, spending_data, user_id, month):
     ax.pie(values, labels=categories, startangle=90,
            textprops={'fontsize': 8, 'color': TEXT_COLOR},
            autopct='%1.1f%%')
-    ax.axis('equal')
+    ax.axis('equal') # Saglabā apļu proporcijas
     ax.text(0, 0, f"{sum(values)}€", ha='center', va='center',
             fontsize=16, fontweight='bold', color=TEXT_COLOR)
-
+    
+    # Izveido tkinter logu ar rezultātiem
     fifth = tk.Tk()
     fifth.title("Budget Summary")
     fifth.geometry(f"{WIDTH}x{HEIGHT}")
     fifth.configure(bg=BG_COLOR)
 
+    # Virsraksts
     tk.Label(fifth, text="Budget Planner", font=("Arial", 24, "bold"), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
+    # Pievieno matplotlib sektoru diagrammu kā tkinter widget
     canvas = FigureCanvasTkAgg(fig, master=fifth)
     canvas.draw()
     canvas.get_tk_widget().pack(pady=10)
 
+    # Rāda atlikumu (balansu)
     balance_text = f"Balance: {balance}€"
     tk.Label(fifth, text=balance_text, font=("Arial", 14), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(10, 5))
 
+    # "Done" poga – aizver logu
     tk.Button(fifth, 
               text="Done", 
               font=("Arial", 12, "bold"),

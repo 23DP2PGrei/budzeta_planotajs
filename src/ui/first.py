@@ -3,12 +3,13 @@ from src.ui.second import open_second_window
 from src.settings.parameters import WIDTH, HEIGHT, TEXT_COLOR, BUTTON_HIGHLIGHT, BG_COLOR, BUTTON_BG
 
 def start_app():
-    root = tk.Tk()
-    root.title("Budget Planner")
-    root.geometry(f"{WIDTH}x{HEIGHT}")
-    root.resizable(False, False)
-    root.configure(bg=BG_COLOR)
+    root = tk.Tk() # Izveido galveno logu
+    root.title("Budget Planner") # Nosaka loga virsrakstu
+    root.geometry(f"{WIDTH}x{HEIGHT}")  # Uzstāda loga izmēru
+    root.resizable(False, False) # Neļauj lietotājam mainīt loga izmērus
+    root.configure(bg=BG_COLOR) # Uzstāda fona krāsu
 
+    # Izveido virsraksta tekstu
     title = tk.Label(
         root,
         text="Budget Planner",
@@ -16,8 +17,9 @@ def start_app():
         fg=TEXT_COLOR,
         bg=BG_COLOR
     )
-    title.place(relx=0.5, rely=0.35, anchor="center")
+    title.place(relx=0.5, rely=0.35, anchor="center") # Novieto to centrēti logā
 
+    # Izveido "Enter" pogu, kas pāriet uz nākamo logu
     enter_button = tk.Button(
         root, 
         text="Enter", 
@@ -33,8 +35,8 @@ def start_app():
         width=12,
         justify="center",
         overrelief="raised",
-        command=lambda: open_second_window(root)
+        command=lambda: open_second_window(root) # Pogas nospiešana atver nākamo logu
     )
-    enter_button.place(relx=0.5, rely=0.50, anchor="center")
+    enter_button.place(relx=0.5, rely=0.50, anchor="center") # Novieto pogu centrā
 
-    root.mainloop()
+    root.mainloop() # Palaiž programmas galveno ciklu, kas notur logu atvērtu

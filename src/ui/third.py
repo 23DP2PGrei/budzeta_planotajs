@@ -13,15 +13,17 @@ def open_third_window(previous_window, income, user_id, month):
     third.resizable(False, False)
     third.configure(bg=BG_COLOR)
 
+    # Virsraksts un instrukcija
     tk.Label(third, text="Budget Planner", font=("Arial", 24, "bold"), fg=TEXT_COLOR, bg=BG_COLOR).pack(pady=(20, 5))
     tk.Label(third, text="Enter Spending:", font=("Arial", 16, "bold"), fg=TEXT_COLOR, bg=BG_COLOR).pack(anchor="w", padx=20)
 
     content_frame = tk.Frame(third, bg=BG_COLOR)
     content_frame.pack(pady=10)
 
-    category_entries = []
+    category_entries = [] # Glabā katra kategorijas nosaukumu un ievades lauku
     base_font_size = 13
 
+    # Atjauno fontus, ja lietotājs pievieno daudz kategoriju
     def update_fonts():
         nonlocal base_font_size
         if len(category_entries) > 5:
@@ -30,6 +32,7 @@ def open_third_window(previous_window, income, user_id, month):
             label.config(font=("Arial", base_font_size))
             entry.config(font=("Arial", base_font_size))
 
+    # Pievieno vienu kategoriju un ievades lauku
     def add_category(name):
         row = len(category_entries)
         label = tk.Label(content_frame, text=name, font=("Arial", base_font_size),
@@ -43,9 +46,11 @@ def open_third_window(previous_window, income, user_id, month):
         category_entries.append((label, entry))
         update_fonts()
 
+    # Noklusētās kategorijas
     for cat in ["Food", "Healthcare", "Rent", "Loans"]:
         add_category(cat)
 
+    # Poga "Add" papildu kategorijām
     add_frame = tk.Frame(third, bg=BG_COLOR)
     add_frame.pack(pady=(15, 0), anchor="w", padx=20)
 
@@ -53,6 +58,7 @@ def open_third_window(previous_window, income, user_id, month):
                            bg=BUTTON_BG, fg=TEXT_COLOR, bd=1)
     add_button.grid(row=0, column=0, sticky="w")
 
+    # Jauns kategorijas ievades lauks
     def show_category_input():
         add_button.grid_remove()
 
@@ -81,9 +87,11 @@ def open_third_window(previous_window, income, user_id, month):
 
     add_button.config(command=show_category_input)
 
+    # Kļūdu ziņa
     error_label = tk.Label(third, text="", font=("Arial", 10), fg="red", bg=BG_COLOR)
     error_label.pack()
 
+    # Validācija un pāreja uz nākamo logu
     def validate_and_continue():
         for label, entry in category_entries:
             if not entry.get().strip():
