@@ -94,8 +94,16 @@ def open_third_window(previous_window, income, user_id, month):
     # Validācija un pāreja uz nākamo logu
     def validate_and_continue():
         for label, entry in category_entries:
-            if not entry.get().strip():
+            value = entry.get().strip()  # paņem vērtību no ievades lauka
+            if not value:
                 error_label.config(text="Please fill in all fields.")
+                return
+            try:
+                float(value)  # pārbauda, vai var pārveidot par skaitli
+            except ValueError:
+                error_label.config(
+                    text=f"Invalid value in '{label.cget('text')}' – must be a number."
+                )
                 return
         spending_data = get_spending_data(category_entries)
         open_savings_goal_window(third, income, spending_data, user_id, month)

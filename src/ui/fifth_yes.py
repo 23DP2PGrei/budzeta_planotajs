@@ -45,14 +45,14 @@ def open_savings_input_window(previous_window, income, spending_data, user_id, m
             error_label.config(text="All fields are required.")
             return
         try:
-            goal = int(goal)
+            goal = float(goal)
             time = int(time)
         except ValueError:
             error_label.config(text="Please enter valid numbers only.")
             return
 
         error_label.config(text="")
-        open_savings_plan_window(fifth_yes, goal, time, int(income), spending_data, user_id, month)
+        open_savings_plan_window(fifth_yes, goal, time, float(income), spending_data, user_id, month)
 
     next_button = create_next_button(fifth_yes, on_next)
     next_button.place(relx=0.95, rely=0.97, anchor="se")

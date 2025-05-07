@@ -84,7 +84,7 @@ def open_second_window(previous_window):
             return
 
         try:
-            int(income_str)
+            float(income_str)
         except ValueError:
             error_label.config(text="Monthly income must be a number.")
             return
